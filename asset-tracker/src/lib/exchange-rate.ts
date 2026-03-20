@@ -4,7 +4,7 @@ export interface ExchangeRates {
 }
 
 export async function fetchExchangeRates(): Promise<ExchangeRates> {
-	const res = await fetch('https://api.frankfurter.dev/v1/latest?base=USD&symbols=TWD,JPY');
+	const res = await fetch('https://open.er-api.com/v6/latest/USD');
 
 	if (!res.ok) {
 		throw new Error('Failed to fetch exchange rates');
@@ -12,11 +12,15 @@ export async function fetchExchangeRates(): Promise<ExchangeRates> {
 
 	const data = await res.json();
 	const usdToTwd = data.rates.TWD;
-	const jpyToTwd = usdToTwd / data.rates.JPY;
+	const jpyRate = data.rates.JPY;
+
+	if (!usdToTwd || !jpyRate) {
+		throw new Error('Missing TWD or JPY rate in response');
+	}
 
 	return {
 		USD: usdToTwd,
-		JPY: jpyToTwd
+		JPY: usdToTwd / jpyRate
 	};
 }
 
