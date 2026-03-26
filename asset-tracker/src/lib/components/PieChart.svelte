@@ -57,7 +57,27 @@
 					plugins: {
 						legend: {
 							position: 'bottom',
-							labels: { padding: 16, usePointStyle: true }
+							labels: {
+								padding: 16,
+								usePointStyle: true,
+								generateLabels(chart) {
+									const dataset = chart.data.datasets[0];
+									const total = (dataset.data as number[]).reduce((a, b) => a + b, 0);
+									return (chart.data.labels as string[]).map((label, i) => {
+										const value = (dataset.data as number[])[i];
+										const pct = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+										return {
+											text: `${label} ${pct}%`,
+											fillStyle: (dataset.backgroundColor as string[])[i],
+											strokeStyle: '#fff',
+											lineWidth: 2,
+											pointStyle: 'circle',
+											hidden: false,
+											index: i
+										};
+									});
+								}
+							}
 						},
 						tooltip: {
 							callbacks: {
