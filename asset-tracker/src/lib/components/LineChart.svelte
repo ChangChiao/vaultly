@@ -11,6 +11,7 @@
 		Filler
 	} from 'chart.js';
 	import { onMount } from 'svelte';
+	import { getTheme } from '$lib/theme.svelte';
 
 	Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, Filler);
 
@@ -28,10 +29,19 @@
 	}
 
 	let { title, labels, datasets }: Props = $props();
+	const theme = getTheme();
 
 	let canvas: HTMLCanvasElement;
 	let chart: Chart<'line'> | null = null;
 	let mounted = $state(false);
+
+	function getTextColor() {
+		return theme.dark ? '#d1d5db' : '#374151';
+	}
+
+	function getGridColor() {
+		return theme.dark ? '#374151' : '#e5e7eb';
+	}
 
 	function buildDatasets(inputs: DatasetInput[]) {
 		return inputs.map((ds) => ({
@@ -55,15 +65,26 @@
 	});
 
 	$effect(() => {
-		// Read props unconditionally so they are always tracked
 		const currentLabels = labels;
 		const currentDatasets = datasets;
+		const isDark = theme.dark;
 
 		if (!mounted || !canvas) return;
 
 		if (chart) {
 			chart.data.labels = currentLabels;
 			chart.data.datasets = buildDatasets(currentDatasets) as any;
+			if (chart.options.plugins?.legend?.labels) {
+				(chart.options.plugins.legend.labels as any).color = getTextColor();
+			}
+			if (chart.options.scales?.x) {
+				(chart.options.scales.x as any).ticks.color = getTextColor();
+				(chart.options.scales.x as any).grid.color = getGridColor();
+			}
+			if (chart.options.scales?.y) {
+				(chart.options.scales.y as any).ticks.color = getTextColor();
+				(chart.options.scales.y as any).grid.color = getGridColor();
+			}
 			chart.update();
 		} else {
 			chart = new Chart(canvas, {
@@ -78,7 +99,7 @@
 					plugins: {
 						legend: {
 							position: 'bottom',
-							labels: { padding: 16, usePointStyle: true }
+							labels: { padding: 16, usePointStyle: true, color: getTextColor() }
 						},
 						tooltip: {
 							callbacks: {
@@ -90,12 +111,18 @@
 						}
 					},
 					scales: {
+						x: {
+							ticks: { color: getTextColor() },
+							grid: { color: getGridColor() }
+						},
 						y: {
 							ticks: {
+								color: getTextColor(),
 								callback(this: unknown, value: string | number) {
 									return 'NT$ ' + new Intl.NumberFormat('zh-TW', { notation: 'compact' }).format(Number(value));
 								}
-							}
+							},
+							grid: { color: getGridColor() }
 						}
 					}
 				}
@@ -105,6 +132,6 @@
 </script>
 
 <div>
-	<h3 class="mb-2 text-sm font-semibold text-gray-700">{title}</h3>
+	<h3 class="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">{title}</h3>
 	<canvas bind:this={canvas}></canvas>
 </div>

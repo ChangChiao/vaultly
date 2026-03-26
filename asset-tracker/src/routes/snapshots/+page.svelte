@@ -39,15 +39,15 @@
 	}
 </script>
 
-<div class="mx-auto min-h-screen max-w-md bg-gray-50">
+<div class="mx-auto min-h-screen max-w-md bg-gray-50 dark:bg-gray-900">
 	<div class="px-4 pt-6 pb-24">
-		<h1 class="mb-4 text-lg font-bold text-gray-900">所有快照</h1>
+		<h1 class="mb-4 text-lg font-bold text-gray-900 dark:text-white">所有快照</h1>
 
 		{#if loading}
-			<p class="text-center text-gray-400">載入中...</p>
+			<p class="text-center text-gray-400 dark:text-gray-500">載入中...</p>
 		{:else if snapshots.length === 0}
 			<div class="flex flex-col items-center justify-center py-20">
-				<p class="mb-2 text-gray-500">尚無快照紀錄</p>
+				<p class="mb-2 text-gray-500 dark:text-gray-400">尚無快照紀錄</p>
 				<a
 					href="/snapshot/new"
 					class="mt-4 rounded-lg bg-purple-600 px-6 py-2 font-medium text-white hover:bg-purple-700"
@@ -60,15 +60,15 @@
 				{#each snapshots as snap}
 					<a
 						href="/snapshot/edit/{snap.id}"
-						class="flex items-center justify-between rounded-xl bg-white p-4 shadow-sm transition hover:shadow-md"
+						class="flex items-center justify-between rounded-xl bg-white p-4 shadow-sm transition hover:shadow-md dark:bg-gray-800"
 					>
 						<div>
-							<p class="font-medium text-gray-900">{formatDate(snap.date)}</p>
-							<p class="text-xs text-gray-400">{snap.entries.length} 筆資產項目</p>
+							<p class="font-medium text-gray-900 dark:text-white">{formatDate(snap.date)}</p>
+							<p class="text-xs text-gray-400 dark:text-gray-500">{snap.entries.length} 筆資產項目</p>
 						</div>
 						<div class="text-right">
-							<p class="font-semibold text-gray-900">{formatTwd(getTotal(snap.entries))}</p>
-							<p class="text-xs text-gray-400">TWD</p>
+							<p class="font-semibold text-gray-900 dark:text-white">{formatTwd(getTotal(snap.entries))}</p>
+							<p class="text-xs text-gray-400 dark:text-gray-500">TWD</p>
 						</div>
 					</a>
 				{/each}

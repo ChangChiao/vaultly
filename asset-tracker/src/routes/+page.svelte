@@ -100,15 +100,15 @@
   }
 </script>
 
-<div class="mx-auto min-h-screen max-w-md bg-gray-50">
+<div class="mx-auto min-h-screen max-w-md bg-gray-50 dark:bg-gray-900">
   {#if loading}
     <div class="flex min-h-screen items-center justify-center">
-      <p class="text-gray-400">載入中...</p>
+      <p class="text-gray-400 dark:text-gray-500">載入中...</p>
     </div>
   {:else if !snapshot}
     <div class="flex min-h-screen flex-col items-center justify-center px-4">
-      <p class="mb-2 text-lg text-gray-500">尚無資產紀錄</p>
-      <p class="mb-6 text-sm text-gray-400">建立第一筆快照，開始追蹤你的資產</p>
+      <p class="mb-2 text-lg text-gray-500 dark:text-gray-400">尚無資產紀錄</p>
+      <p class="mb-6 text-sm text-gray-400 dark:text-gray-500">建立第一筆快照，開始追蹤你的資產</p>
       <a
         href="/snapshot/new"
         class="rounded-lg bg-purple-600 px-6 py-2 font-medium text-white hover:bg-purple-700"
@@ -121,13 +121,13 @@
       <div class="mb-6 flex items-start justify-between">
         <div>
           <div class="flex items-center gap-2">
-            <p class="text-sm text-gray-500">我的淨資產 (TWD)</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">我的淨資產 (TWD)</p>
             <button
               onclick={handleSignOut}
-              class="text-xs text-gray-400 hover:text-gray-600">登出</button
+              class="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300">登出</button
             >
           </div>
-          <p class="text-3xl font-bold text-gray-900">
+          <p class="text-3xl font-bold text-gray-900 dark:text-white">
             {formatTwd(totalTwd)}
           </p>
         </div>
@@ -155,7 +155,7 @@
       <div class="mt-4 text-center">
         <a
           href="/snapshot/edit/{snapshot.id}"
-          class="text-sm text-purple-600 hover:text-purple-800"
+          class="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300"
         >
           編輯此快照
         </a>

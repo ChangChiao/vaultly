@@ -62,10 +62,10 @@
   }
 </script>
 
-<div class="mx-auto min-h-screen max-w-md bg-white px-4 py-6">
+<div class="mx-auto min-h-screen max-w-md bg-white px-4 py-6 dark:bg-gray-900">
   <div class="mb-6 flex items-center">
-    <a href="/" class="mr-3 text-gray-400 hover:text-gray-600">←</a>
-    <h1 class="text-lg font-bold text-gray-900">新增快照</h1>
+    <a href="/" class="mr-3 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300">←</a>
+    <h1 class="text-lg font-bold text-gray-900 dark:text-white">新增快照</h1>
   </div>
 
   <SnapshotForm onSave={handleSave} />

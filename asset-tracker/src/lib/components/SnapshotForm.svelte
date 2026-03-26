@@ -119,55 +119,55 @@
 
 <form onsubmit={handleSubmit} class="space-y-6">
 	<div>
-		<label for="date" class="mb-1 block text-sm font-medium text-gray-700">日期</label>
+		<label for="date" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">日期</label>
 		<input
 			id="date"
 			type="date"
 			bind:value={date}
 			required
-			class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 focus:outline-none"
+			class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:ring-purple-800"
 		/>
 	</div>
 
 	{#if ratesError}
-		<div class="rounded-lg border border-amber-300 bg-amber-50 p-3">
-			<p class="mb-2 text-sm font-medium text-amber-800">無法取得匯率，請手動輸入：</p>
+		<div class="rounded-lg border border-amber-300 bg-amber-50 p-3 dark:border-amber-600 dark:bg-amber-900/30">
+			<p class="mb-2 text-sm font-medium text-amber-800 dark:text-amber-300">無法取得匯率，請手動輸入：</p>
 			<div class="flex gap-3">
 				<div class="flex-1">
-					<label for="manual-usd" class="text-xs text-amber-700">USD/TWD</label>
+					<label for="manual-usd" class="text-xs text-amber-700 dark:text-amber-400">USD/TWD</label>
 					<input
 						id="manual-usd"
 						type="number"
 						step="0.01"
 						bind:value={manualUsd}
 						placeholder="32.5"
-						class="mt-1 w-full rounded border border-amber-300 px-2 py-1 text-sm"
+						class="mt-1 w-full rounded border border-amber-300 bg-white px-2 py-1 text-sm dark:border-amber-600 dark:bg-gray-700 dark:text-white"
 					/>
 				</div>
 				<div class="flex-1">
-					<label for="manual-jpy" class="text-xs text-amber-700">JPY/TWD</label>
+					<label for="manual-jpy" class="text-xs text-amber-700 dark:text-amber-400">JPY/TWD</label>
 					<input
 						id="manual-jpy"
 						type="number"
 						step="0.0001"
 						bind:value={manualJpy}
 						placeholder="0.215"
-						class="mt-1 w-full rounded border border-amber-300 px-2 py-1 text-sm"
+						class="mt-1 w-full rounded border border-amber-300 bg-white px-2 py-1 text-sm dark:border-amber-600 dark:bg-gray-700 dark:text-white"
 					/>
 				</div>
 			</div>
 		</div>
 	{:else if rates}
-		<div class="rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-500">
+		<div class="rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-500 dark:bg-gray-700 dark:text-gray-400">
 			匯率：USD/TWD {rates.USD.toFixed(2)} ・ JPY/TWD {rates.JPY.toFixed(4)}
 		</div>
 	{:else}
-		<p class="text-sm text-gray-400">取得匯率中...</p>
+		<p class="text-sm text-gray-400 dark:text-gray-500">取得匯率中...</p>
 	{/if}
 
 	{#each groups as group}
 		<div>
-			<h3 class="mb-2 border-l-4 {group.color} pl-2 text-sm font-semibold text-gray-700">
+			<h3 class="mb-2 border-l-4 {group.color} pl-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
 				{group.name}
 			</h3>
 			<div class="space-y-2">
@@ -176,9 +176,9 @@
 					{@const rate = getRate(config.currency)}
 					{@const twdValue = (amounts[cat] || 0) * rate}
 					<div class="flex items-center gap-2">
-						<label for={cat} class="w-16 text-sm text-gray-600">{config.label}</label>
+						<label for={cat} class="w-16 text-sm text-gray-600 dark:text-gray-400">{config.label}</label>
 						<div class="relative flex-1">
-							<span class="absolute top-1/2 left-3 -translate-y-1/2 text-xs text-gray-400"
+							<span class="absolute top-1/2 left-3 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500"
 								>{config.currency}</span
 							>
 							<input
@@ -187,11 +187,11 @@
 								step="0.01"
 								bind:value={amounts[cat]}
 								placeholder="0"
-								class="w-full rounded-lg border border-gray-300 py-2 pr-3 pl-12 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 focus:outline-none"
+								class="w-full rounded-lg border border-gray-300 bg-white py-2 pr-3 pl-12 text-gray-900 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:ring-purple-800"
 							/>
 						</div>
 						{#if config.currency !== 'TWD' && twdValue > 0}
-							<span class="w-32 text-right text-xs text-gray-400">
+							<span class="w-32 text-right text-xs text-gray-400 dark:text-gray-500">
 								→ NT$ {formatTwd(twdValue)}
 							</span>
 						{/if}
@@ -201,14 +201,14 @@
 		</div>
 	{/each}
 
-	<div class="border-t pt-4">
-		<p class="text-right text-lg font-bold text-gray-900">
+	<div class="border-t border-gray-200 pt-4 dark:border-gray-700">
+		<p class="text-right text-lg font-bold text-gray-900 dark:text-white">
 			總計：NT$ {formatTwd(totalTwd)}
 		</p>
 	</div>
 
 	{#if error}
-		<p class="text-sm text-red-600">{error}</p>
+		<p class="text-sm text-red-600 dark:text-red-400">{error}</p>
 	{/if}
 
 	<button

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Chart, PieController, ArcElement, Tooltip, Legend, type ChartData } from 'chart.js';
 	import { onMount } from 'svelte';
+	import { getTheme } from '$lib/theme.svelte';
 
 	Chart.register(PieController, ArcElement, Tooltip, Legend);
 
@@ -12,6 +13,7 @@
 	}
 
 	let { title, labels, data, colors }: Props = $props();
+	const theme = getTheme();
 
 	let canvas: HTMLCanvasElement;
 	let chart: Chart<'pie'> | null = null;
@@ -25,11 +27,19 @@
 		};
 	});
 
+	function getTextColor() {
+		return theme.dark ? '#d1d5db' : '#374151';
+	}
+
+	function getBorderColor() {
+		return theme.dark ? '#1f2937' : '#fff';
+	}
+
 	$effect(() => {
-		// Read props unconditionally so they are always tracked
 		const currentLabels = labels;
 		const currentData = data;
 		const currentColors = colors;
+		const isDark = theme.dark;
 
 		if (!mounted || !canvas) return;
 
@@ -37,6 +47,10 @@
 			chart.data.labels = currentLabels;
 			chart.data.datasets[0].data = currentData;
 			chart.data.datasets[0].backgroundColor = currentColors;
+			chart.data.datasets[0].borderColor = getBorderColor();
+			if (chart.options.plugins?.legend?.labels) {
+				(chart.options.plugins.legend.labels as any).color = getTextColor();
+			}
 			chart.update();
 		} else {
 			chart = new Chart(canvas, {
@@ -48,7 +62,7 @@
 							data: currentData,
 							backgroundColor: currentColors,
 							borderWidth: 2,
-							borderColor: '#fff'
+							borderColor: getBorderColor()
 						}
 					]
 				},
@@ -60,6 +74,7 @@
 							labels: {
 								padding: 16,
 								usePointStyle: true,
+								color: getTextColor(),
 								generateLabels(chart) {
 									const dataset = chart.data.datasets[0];
 									const total = (dataset.data as number[]).reduce((a, b) => a + b, 0);
@@ -68,8 +83,9 @@
 										const pct = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
 										return {
 											text: `${label} ${pct}%`,
+											fontColor: getTextColor(),
 											fillStyle: (dataset.backgroundColor as string[])[i],
-											strokeStyle: '#fff',
+											strokeStyle: getBorderColor(),
 											lineWidth: 2,
 											pointStyle: 'circle',
 											hidden: false,
@@ -97,6 +113,6 @@
 </script>
 
 <div>
-	<h3 class="mb-2 text-sm font-semibold text-gray-700">{title}</h3>
+	<h3 class="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">{title}</h3>
 	<canvas bind:this={canvas}></canvas>
 </div>

@@ -66,22 +66,22 @@
 	}
 </script>
 
-<div class="mx-auto min-h-screen max-w-md bg-white px-4 py-6">
+<div class="mx-auto min-h-screen max-w-md bg-white px-4 py-6 dark:bg-gray-900">
 	<div class="mb-6 flex items-center justify-between">
 		<div class="flex items-center">
-			<a href="/" class="mr-3 text-gray-400 hover:text-gray-600">←</a>
-			<h1 class="text-lg font-bold text-gray-900">編輯快照</h1>
+			<a href="/" class="mr-3 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300">←</a>
+			<h1 class="text-lg font-bold text-gray-900 dark:text-white">編輯快照</h1>
 		</div>
 		<button
 			onclick={() => (showDeleteConfirm = true)}
-			class="text-sm text-red-500 hover:text-red-700"
+			class="text-sm text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
 		>
 			刪除
 		</button>
 	</div>
 
 	{#if loading}
-		<p class="text-center text-gray-400">載入中...</p>
+		<p class="text-center text-gray-400 dark:text-gray-500">載入中...</p>
 	{:else if initialDate && initialAmounts}
 		<SnapshotForm
 			{initialDate}
@@ -93,12 +93,12 @@
 
 	{#if showDeleteConfirm}
 		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-			<div class="mx-4 w-full max-w-xs rounded-xl bg-white p-6">
-				<p class="mb-4 text-center text-gray-900">確定要刪除這筆快照嗎？</p>
+			<div class="mx-4 w-full max-w-xs rounded-xl bg-white p-6 dark:bg-gray-800">
+				<p class="mb-4 text-center text-gray-900 dark:text-white">確定要刪除這筆快照嗎？</p>
 				<div class="flex gap-3">
 					<button
 						onclick={() => (showDeleteConfirm = false)}
-						class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-gray-700"
+						class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-gray-700 dark:border-gray-600 dark:text-gray-300"
 					>
 						取消
 					</button>

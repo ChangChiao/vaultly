@@ -149,27 +149,27 @@
 	}
 
 	function diffColor(value: number | null): string {
-		if (value === null) return 'text-gray-400';
-		if (value > 0) return 'text-green-600';
-		if (value < 0) return 'text-red-600';
-		return 'text-gray-400';
+		if (value === null) return 'text-gray-400 dark:text-gray-500';
+		if (value > 0) return 'text-green-600 dark:text-green-400';
+		if (value < 0) return 'text-red-600 dark:text-red-400';
+		return 'text-gray-400 dark:text-gray-500';
 	}
 </script>
 
-<div class="mx-auto min-h-screen max-w-md bg-gray-50 px-4 pt-6 pb-24">
-	<h1 class="mb-6 text-lg font-bold text-gray-900">報表</h1>
+<div class="mx-auto min-h-screen max-w-md bg-gray-50 px-4 pt-6 pb-24 dark:bg-gray-900">
+	<h1 class="mb-6 text-lg font-bold text-gray-900 dark:text-white">報表</h1>
 
 	{#if loading}
-		<p class="text-center text-gray-400">載入中...</p>
+		<p class="text-center text-gray-400 dark:text-gray-500">載入中...</p>
 	{:else if snapshots.length === 0}
 		<div class="py-20 text-center">
-			<p class="text-gray-500">尚無資料</p>
-			<p class="mt-1 text-sm text-gray-400">新增快照後即可查看報表</p>
+			<p class="text-gray-500 dark:text-gray-400">尚無資料</p>
+			<p class="mt-1 text-sm text-gray-400 dark:text-gray-500">新增快照後即可查看報表</p>
 		</div>
 	{:else}
 		<div class="space-y-6">
 			<div class="space-y-4">
-				<div class="rounded-xl bg-white p-4 shadow-sm">
+				<div class="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800">
 					<PieChart
 						title="資產配置"
 						labels={allocationLabels}
@@ -177,7 +177,7 @@
 						colors={allocationColors}
 					/>
 				</div>
-				<div class="rounded-xl bg-white p-4 shadow-sm">
+				<div class="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800">
 					{#if hasStockData}
 						<PieChart
 							title="股票比例"
@@ -186,13 +186,13 @@
 							colors={stockColors}
 						/>
 					{:else}
-						<h3 class="mb-2 text-sm font-semibold text-gray-700">股票比例</h3>
-						<p class="py-8 text-center text-xs text-gray-400">無股票資產</p>
+						<h3 class="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">股票比例</h3>
+						<p class="py-8 text-center text-xs text-gray-400 dark:text-gray-500">無股票資產</p>
 					{/if}
 				</div>
 			</div>
 
-			<div class="rounded-xl bg-white p-4 shadow-sm">
+			<div class="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800">
 				{#if snapshots.length >= 2}
 					<LineChart
 						title="資產趨勢"
@@ -200,17 +200,17 @@
 						datasets={trendDatasets}
 					/>
 				{:else}
-					<h3 class="mb-2 text-sm font-semibold text-gray-700">資產趨勢</h3>
-					<p class="py-8 text-center text-xs text-gray-400">
+					<h3 class="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">資產趨勢</h3>
+					<p class="py-8 text-center text-xs text-gray-400 dark:text-gray-500">
 						新增更多快照以查看趨勢
 					</p>
 				{/if}
 			</div>
 
-			<div class="overflow-hidden rounded-xl bg-white shadow-sm">
+			<div class="overflow-hidden rounded-xl bg-white shadow-sm dark:bg-gray-800">
 				<table class="w-full text-sm">
 					<thead>
-						<tr class="border-b bg-gray-50 text-left text-xs text-gray-500">
+						<tr class="border-b border-gray-200 bg-gray-50 text-left text-xs text-gray-500 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-400">
 							<th class="px-4 py-2">類別</th>
 							<th class="px-4 py-2 text-right">金額 (TWD)</th>
 							<th class="px-4 py-2 text-right">比例</th>
@@ -219,10 +219,10 @@
 					</thead>
 					<tbody>
 						{#each detailRows as row}
-							<tr class="border-b last:border-0">
-								<td class="px-4 py-2 text-gray-700">{row.label}</td>
-								<td class="px-4 py-2 text-right text-gray-900">{formatTwd(row.twd)}</td>
-								<td class="px-4 py-2 text-right text-gray-500">{row.pct.toFixed(1)}%</td>
+							<tr class="border-b border-gray-200 last:border-0 dark:border-gray-700">
+								<td class="px-4 py-2 text-gray-700 dark:text-gray-300">{row.label}</td>
+								<td class="px-4 py-2 text-right text-gray-900 dark:text-white">{formatTwd(row.twd)}</td>
+								<td class="px-4 py-2 text-right text-gray-500 dark:text-gray-400">{row.pct.toFixed(1)}%</td>
 								<td class="px-4 py-2 text-right {diffColor(row.diff)}">{formatDiff(row.diff)}</td>
 							</tr>
 						{/each}
