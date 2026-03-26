@@ -12,7 +12,7 @@
   let showNav = $derived(
     auth.user &&
       !page.url.pathname.startsWith("/login") &&
-      !page.url.pathname.startsWith("/snapshot"),
+      !page.url.pathname.startsWith("/snapshot/"),
   );
 
   $effect(() => {

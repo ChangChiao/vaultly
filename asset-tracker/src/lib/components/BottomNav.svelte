@@ -3,6 +3,7 @@
 
 	const tabs = [
 		{ href: '/', label: '首頁', icon: '🏠' },
+		{ href: '/snapshots', label: '編輯', icon: '✏️' },
 		{ href: '/reports', label: '報表', icon: '📊' }
 	];
 
