@@ -6,6 +6,7 @@
 	let password = $state('');
 	let error = $state('');
 	let loading = $state(false);
+	let showPassword = $state(false);
 
 	async function handleLogin() {
 		error = '';
@@ -45,14 +46,35 @@
 
 			<div>
 				<label for="password" class="mb-1 block text-sm font-medium text-gray-700">密碼</label>
-				<input
-					id="password"
-					type="password"
-					bind:value={password}
-					required
-					class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 focus:outline-none"
-					placeholder="••••••••"
-				/>
+				<div class="relative">
+					<input
+						id="password"
+						type={showPassword ? 'text' : 'password'}
+						bind:value={password}
+						required
+						class="w-full rounded-lg border border-gray-300 px-3 py-2 pr-10 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 focus:outline-none"
+						placeholder="••••••••"
+					/>
+					<button
+						type="button"
+						onclick={() => (showPassword = !showPassword)}
+						class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+						aria-label={showPassword ? '隱藏密碼' : '顯示密碼'}
+					>
+						{#if showPassword}
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+								<path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+								<line x1="1" y1="1" x2="23" y2="23" />
+							</svg>
+						{:else}
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+								<circle cx="12" cy="12" r="3" />
+							</svg>
+						{/if}
+					</button>
+				</div>
 			</div>
 
 			{#if error}
