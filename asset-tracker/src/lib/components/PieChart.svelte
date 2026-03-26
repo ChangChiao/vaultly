@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Chart, ArcElement, Tooltip, Legend, type ChartData } from 'chart.js';
+	import { Chart, PieController, ArcElement, Tooltip, Legend, type ChartData } from 'chart.js';
 	import { onMount } from 'svelte';
 
-	Chart.register(ArcElement, Tooltip, Legend);
+	Chart.register(PieController, ArcElement, Tooltip, Legend);
 
 	interface Props {
 		title: string;
@@ -15,51 +15,63 @@
 
 	let canvas: HTMLCanvasElement;
 	let chart: Chart<'pie'> | null = null;
+	let mounted = $state(false);
 
 	onMount(() => {
-		chart = new Chart(canvas, {
-			type: 'pie',
-			data: {
-				labels,
-				datasets: [
-					{
-						data,
-						backgroundColor: colors,
-						borderWidth: 2,
-						borderColor: '#fff'
-					}
-				]
-			},
-			options: {
-				responsive: true,
-				plugins: {
-					legend: {
-						position: 'bottom',
-						labels: { padding: 16, usePointStyle: true }
-					},
-					tooltip: {
-						callbacks: {
-							label(ctx) {
-								const total = ctx.dataset.data.reduce((a: number, b: number) => a + b, 0);
-								const pct = ((ctx.parsed / total) * 100).toFixed(1);
-								const value = new Intl.NumberFormat('zh-TW').format(Math.round(ctx.parsed));
-								return `${ctx.label}: NT$ ${value} (${pct}%)`;
+		mounted = true;
+		return () => {
+			chart?.destroy();
+			chart = null;
+		};
+	});
+
+	$effect(() => {
+		// Read props unconditionally so they are always tracked
+		const currentLabels = labels;
+		const currentData = data;
+		const currentColors = colors;
+
+		if (!mounted || !canvas) return;
+
+		if (chart) {
+			chart.data.labels = currentLabels;
+			chart.data.datasets[0].data = currentData;
+			chart.data.datasets[0].backgroundColor = currentColors;
+			chart.update();
+		} else {
+			chart = new Chart(canvas, {
+				type: 'pie',
+				data: {
+					labels: currentLabels,
+					datasets: [
+						{
+							data: currentData,
+							backgroundColor: currentColors,
+							borderWidth: 2,
+							borderColor: '#fff'
+						}
+					]
+				},
+				options: {
+					responsive: true,
+					plugins: {
+						legend: {
+							position: 'bottom',
+							labels: { padding: 16, usePointStyle: true }
+						},
+						tooltip: {
+							callbacks: {
+								label(ctx) {
+									const total = ctx.dataset.data.reduce((a: number, b: number) => a + b, 0);
+									const pct = ((ctx.parsed / total) * 100).toFixed(1);
+									const value = new Intl.NumberFormat('zh-TW').format(Math.round(ctx.parsed));
+									return `${ctx.label}: NT$ ${value} (${pct}%)`;
+								}
 							}
 						}
 					}
 				}
-			}
-		});
-
-		return () => chart?.destroy();
-	});
-
-	$effect(() => {
-		if (chart) {
-			chart.data.labels = labels;
-			chart.data.datasets[0].data = data;
-			chart.data.datasets[0].backgroundColor = colors;
-			chart.update();
+			});
 		}
 	});
 </script>

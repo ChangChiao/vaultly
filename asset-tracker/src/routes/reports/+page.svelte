@@ -58,7 +58,7 @@
 
 	// Pie chart 2: stock market allocation
 	let stockLabels = ['台股', '美股', '英股'];
-	let stockColors = ['#a855f7', '#6366f1', '#8b5cf6'];
+	let stockColors = ['#a855f7', '#3b82f6', '#f59e0b'];
 	let stockData = $derived(
 		latest
 			? [
