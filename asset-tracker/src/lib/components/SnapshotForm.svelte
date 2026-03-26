@@ -70,7 +70,8 @@
 		}, 0)
 	);
 
-	async function handleSubmit() {
+	async function handleSubmit(event: Event) {
+		event.preventDefault();
 		saving = true;
 		error = '';
 

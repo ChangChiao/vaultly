@@ -52,6 +52,7 @@
 		{ name: '股票', color: 'bg-purple-500', subtitle: '台股、美股、英股', categories: ['stock_tw', 'stock_us', 'stock_uk'] },
 		{ name: '現金', color: 'bg-blue-500', subtitle: '台幣', categories: ['cash'] },
 		{ name: '定存', color: 'bg-green-500', subtitle: '台幣', categories: ['deposit'] },
+		{ name: '基金', color: 'bg-teal-500', subtitle: '台幣', categories: ['fund'] },
 		{ name: '外幣現金', color: 'bg-amber-500', subtitle: 'USD、JPY', categories: ['forex_usd', 'forex_jpy'] }
 	];
 
