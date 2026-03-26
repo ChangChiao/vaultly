@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CATEGORIES, CATEGORY_CONFIG, type Category } from '$lib/types';
+	import { CATEGORIES, CATEGORY_CONFIG, type Category, type Currency } from '$lib/types';
 	import { fetchExchangeRates, convertToTwd, type ExchangeRates } from '$lib/exchange-rate';
 
 	interface Props {
@@ -40,6 +40,17 @@
 	let saving = $state(false);
 	let error = $state('');
 
+	// Currency override for stock_us and stock_uk (default TWD)
+	let currencyOverride: Record<string, Currency> = $state({
+		stock_us: 'TWD',
+		stock_uk: 'TWD'
+	});
+
+	function getEffectiveCurrency(cat: Category): Currency {
+		if (cat in currencyOverride) return currencyOverride[cat];
+		return CATEGORY_CONFIG[cat].currency;
+	}
+
 	$effect(() => {
 		fetchExchangeRates()
 			.then((r) => {
@@ -64,8 +75,8 @@
 
 	let totalTwd = $derived(
 		CATEGORIES.reduce((sum, cat) => {
-			const config = CATEGORY_CONFIG[cat];
-			const rate = getRate(config.currency);
+			const currency = getEffectiveCurrency(cat);
+			const rate = getRate(currency);
 			return sum + (amounts[cat] || 0) * rate;
 		}, 0)
 	);
@@ -76,12 +87,12 @@
 		error = '';
 
 		const entries = CATEGORIES.map((cat) => {
-			const config = CATEGORY_CONFIG[cat];
-			const rate = getRate(config.currency);
+			const currency = getEffectiveCurrency(cat);
+			const rate = getRate(currency);
 			return {
 				category: cat,
 				amount: amounts[cat] || 0,
-				currency: config.currency,
+				currency,
 				rate,
 				twd: (amounts[cat] || 0) * rate
 			};
@@ -173,14 +184,28 @@
 			<div class="space-y-2">
 				{#each group.categories as cat}
 					{@const config = CATEGORY_CONFIG[cat]}
-					{@const rate = getRate(config.currency)}
+					{@const effectiveCurrency = getEffectiveCurrency(cat)}
+					{@const rate = getRate(effectiveCurrency)}
 					{@const twdValue = (amounts[cat] || 0) * rate}
+					{@const hasCurrencyToggle = cat in currencyOverride}
 					<div class="flex items-center gap-2">
 						<label for={cat} class="w-16 text-sm text-gray-600 dark:text-gray-400">{config.label}</label>
 						<div class="relative flex-1">
-							<span class="absolute top-1/2 left-3 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500"
-								>{config.currency}</span
-							>
+							{#if hasCurrencyToggle}
+								<button
+									type="button"
+									onclick={() => {
+										currencyOverride[cat] = currencyOverride[cat] === 'TWD' ? 'USD' : 'TWD';
+									}}
+									class="absolute top-1/2 left-2 -translate-y-1/2 rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 text-xs text-gray-500 hover:bg-gray-200 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
+								>
+									{effectiveCurrency}
+								</button>
+							{:else}
+								<span class="absolute top-1/2 left-3 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500"
+									>{effectiveCurrency}</span
+								>
+							{/if}
 							<input
 								id={cat}
 								type="number"
@@ -190,7 +215,7 @@
 								class="w-full rounded-lg border border-gray-300 bg-white py-2 pr-3 pl-12 text-gray-900 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:ring-purple-800"
 							/>
 						</div>
-						{#if config.currency !== 'TWD' && twdValue > 0}
+						{#if effectiveCurrency !== 'TWD' && twdValue > 0}
 							<span class="w-32 text-right text-xs text-gray-400 dark:text-gray-500">
 								→ NT$ {formatTwd(twdValue)}
 							</span>
