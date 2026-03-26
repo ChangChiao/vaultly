@@ -4,6 +4,7 @@ export type Category =
 	| 'stock_uk'
 	| 'cash'
 	| 'deposit'
+	| 'fund'
 	| 'forex_usd'
 	| 'forex_jpy';
 
@@ -41,6 +42,7 @@ export const CATEGORY_CONFIG: Record<
 	stock_uk: { label: '英股', currency: 'USD', group: '股票' },
 	cash: { label: '現金', currency: 'TWD', group: '現金' },
 	deposit: { label: '定存', currency: 'TWD', group: '定存' },
+	fund: { label: '基金', currency: 'TWD', group: '基金' },
 	forex_usd: { label: '美金', currency: 'USD', group: '外幣現金' },
 	forex_jpy: { label: '日圓', currency: 'JPY', group: '外幣現金' }
 };
@@ -51,6 +53,7 @@ export const CATEGORIES: Category[] = [
 	'stock_uk',
 	'cash',
 	'deposit',
+	'fund',
 	'forex_usd',
 	'forex_jpy'
 ];

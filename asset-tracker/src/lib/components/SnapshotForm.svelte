@@ -103,6 +103,7 @@
 		},
 		{ name: '現金', color: 'border-blue-500', categories: ['cash'] as Category[] },
 		{ name: '定存', color: 'border-green-500', categories: ['deposit'] as Category[] },
+		{ name: '基金', color: 'border-teal-500', categories: ['fund'] as Category[] },
 		{
 			name: '外幣現金',
 			color: 'border-amber-500',
