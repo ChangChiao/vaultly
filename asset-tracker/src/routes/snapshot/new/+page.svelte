@@ -1,6 +1,7 @@
 <script lang="ts">
   import SnapshotForm from "$lib/components/SnapshotForm.svelte";
   import { supabase } from "$lib/supabase";
+  import { runWithBackendRecovery } from "$lib/backend.svelte";
   import { getAuth } from "$lib/auth.svelte";
   import { goto } from "$app/navigation";
   import type { Category } from "$lib/types";
@@ -21,22 +22,26 @@
     if (!userId) throw new Error("未登入");
 
     // Check duplicate date
-    const { data: existing } = await supabase
-      .from("snapshots")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("date", data.date)
-      .maybeSingle();
+    const { data: existing } = await runWithBackendRecovery(() =>
+      supabase
+        .from("snapshots")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("date", data.date)
+        .maybeSingle(),
+    );
 
     if (existing) {
       throw new Error(`${data.date} 已有快照紀錄`);
     }
 
-    const { data: snapshot, error: snapError } = await supabase
-      .from("snapshots")
-      .insert({ user_id: userId, date: data.date })
-      .select()
-      .single();
+    const { data: snapshot, error: snapError } = await runWithBackendRecovery(() =>
+      supabase
+        .from("snapshots")
+        .insert({ user_id: userId, date: data.date })
+        .select()
+        .single(),
+    );
 
     if (snapError) throw new Error(snapError.message);
 
@@ -53,7 +58,9 @@
 
     const { data: insertedEntries, error: entryError } =
       entries.length > 0
-        ? await supabase.from("snapshot_entries").insert(entries).select()
+        ? await runWithBackendRecovery(() =>
+            supabase.from("snapshot_entries").insert(entries).select(),
+          )
         : { data: [], error: null };
 
     if (entryError) throw new Error(entryError.message);

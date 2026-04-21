@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { supabase } from '$lib/supabase';
+	import { getBackendState, runWithBackendRecovery } from '$lib/backend.svelte';
 	import { getAuth } from '$lib/auth.svelte';
 	import PieChart from '$lib/components/PieChart.svelte';
 	import LineChart from '$lib/components/LineChart.svelte';
 	import type { SnapshotEntry } from '$lib/types';
 
 	const auth = getAuth();
+	const backend = getBackendState();
 
 	interface SnapshotData {
 		id: string;
@@ -15,24 +17,35 @@
 
 	let snapshots = $state<SnapshotData[]>([]);
 	let loading = $state(true);
+	let loadError = $state('');
 
 	$effect(() => {
 		if (auth.user) loadSnapshots();
 	});
 
 	async function loadSnapshots() {
-		const { data } = await supabase
-			.from('snapshots')
-			.select('*, snapshot_entries(*)')
-			.eq('user_id', auth.user!.id)
-			.order('date', { ascending: true });
+		loading = true;
+		loadError = '';
 
-		snapshots = (data ?? []).map((s) => ({
-			id: s.id,
-			date: s.date,
-			entries: s.snapshot_entries as SnapshotEntry[]
-		}));
-		loading = false;
+		try {
+			const { data } = await runWithBackendRecovery(() =>
+				supabase
+					.from('snapshots')
+					.select('*, snapshot_entries(*)')
+					.eq('user_id', auth.user!.id)
+					.order('date', { ascending: true })
+			);
+
+			snapshots = (data ?? []).map((s: any) => ({
+				id: s.id,
+				date: s.date,
+				entries: s.snapshot_entries as SnapshotEntry[]
+			}));
+		} catch (error) {
+			loadError = error instanceof Error ? error.message : '載入失敗';
+		} finally {
+			loading = false;
+		}
 	}
 
 	let latest = $derived(snapshots.length > 0 ? snapshots[snapshots.length - 1] : null);
@@ -160,7 +173,31 @@
 	<h1 class="mb-6 text-lg font-bold text-gray-900 dark:text-white">報表</h1>
 
 	{#if loading}
-		<p class="text-center text-gray-400 dark:text-gray-500">載入中...</p>
+		<div class="space-y-4">
+			{#each Array.from({ length: 3 }) as _, index}
+				<div
+					class="animate-pulse rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800"
+					aria-hidden={index >= 0}
+				>
+					<div class="mb-4 h-4 w-24 rounded bg-gray-200 dark:bg-gray-700"></div>
+					<div class="h-48 rounded bg-gray-200 dark:bg-gray-700"></div>
+				</div>
+			{/each}
+		</div>
+		<p class="mt-5 text-center text-sm text-gray-400 dark:text-gray-500">
+			{backend.isPending ? '資料服務正在喚醒，圖表會在連線後自動載入。' : '載入中...'}
+		</p>
+	{:else if loadError}
+		<div class="py-20 text-center">
+			<p class="text-gray-700 dark:text-gray-200">暫時無法載入報表</p>
+			<p class="mt-1 text-sm text-gray-400 dark:text-gray-500">{loadError}</p>
+			<button
+				onclick={loadSnapshots}
+				class="mt-4 rounded-lg bg-purple-600 px-6 py-2 font-medium text-white hover:bg-purple-700"
+			>
+				重新載入
+			</button>
+		</div>
 	{:else if snapshots.length === 0}
 		<div class="py-20 text-center">
 			<p class="text-gray-500 dark:text-gray-400">尚無資料</p>

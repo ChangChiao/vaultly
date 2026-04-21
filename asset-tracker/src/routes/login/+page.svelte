@@ -1,35 +1,56 @@
 <script lang="ts">
 	import { supabase } from '$lib/supabase';
+	import { getBackendState, runWithBackendRecovery, warmupSupabase } from '$lib/backend.svelte';
 	import { goto } from '$app/navigation';
 
+	const backend = getBackendState();
 	let email = $state('');
 	let password = $state('');
 	let error = $state('');
 	let loading = $state(false);
 	let showPassword = $state(false);
 
+	$effect(() => {
+		warmupSupabase({ allowFailure: true });
+	});
+
 	async function handleLogin() {
 		error = '';
 		loading = true;
 
-		const { error: authError } = await supabase.auth.signInWithPassword({
-			email,
-			password
-		});
+		try {
+			const { error: authError } = await runWithBackendRecovery(
+				() =>
+					supabase.auth.signInWithPassword({
+						email,
+						password
+					}),
+				{ skipWarmup: true }
+			);
 
-		if (authError) {
-			error = authError.message;
+			if (authError) {
+				error = authError.message;
+				return;
+			}
+
+			goto('/');
+		} catch (e) {
+			error = e instanceof Error ? e.message : '登入失敗';
+		} finally {
 			loading = false;
-			return;
 		}
-
-		goto('/');
 	}
 </script>
 
 <div class="flex min-h-screen items-center justify-center bg-gray-50 px-4 dark:bg-gray-900">
 	<div class="w-full max-w-sm">
 		<h1 class="mb-8 text-center text-2xl font-bold text-gray-900 dark:text-white">Asset Tracker</h1>
+
+		{#if backend.isPending}
+			<div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/60 dark:text-amber-200">
+				免費方案資料庫正在喚醒，第一次登入可能需要 10 到 60 秒。
+			</div>
+		{/if}
 
 		<form onsubmit={handleLogin} class="space-y-4">
 			<div>
@@ -86,7 +107,7 @@
 				disabled={loading}
 				class="w-full rounded-lg bg-purple-600 px-4 py-2 font-medium text-white hover:bg-purple-700 disabled:opacity-50"
 			>
-				{loading ? '登入中...' : '登入'}
+				{loading ? (backend.isPending ? '正在喚醒服務並登入...' : '登入中...') : '登入'}
 			</button>
 		</form>
 	</div>
