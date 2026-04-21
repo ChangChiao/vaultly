@@ -1,5 +1,6 @@
 import type { User } from '@supabase/supabase-js';
 import { supabase } from './supabase';
+import { clearUserCaches } from './cache';
 
 let user = $state<User | null>(null);
 let loading = $state(true);
@@ -26,5 +27,8 @@ export function getAuth() {
 }
 
 export async function signOut() {
+	if (user?.id) {
+		clearUserCaches(user.id);
+	}
 	await supabase.auth.signOut();
 }

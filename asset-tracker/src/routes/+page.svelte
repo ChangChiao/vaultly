@@ -2,23 +2,49 @@
   import { supabase } from "$lib/supabase";
   import { getBackendState, runWithBackendRecovery } from "$lib/backend.svelte";
   import { getAuth, signOut } from "$lib/auth.svelte";
+  import { readCache, removeCache, writeCache } from "$lib/cache";
   import { goto } from "$app/navigation";
   import AssetCard from "$lib/components/AssetCard.svelte";
   import type { SnapshotEntry, SnapshotWithEntries } from "$lib/types";
 
+  const CACHE_TTL_MS = 1000 * 60 * 60 * 12;
   const auth = getAuth();
   const backend = getBackendState();
 
   let snapshot = $state<SnapshotWithEntries | null>(null);
   let loading = $state(true);
+  let refreshing = $state(false);
   let loadError = $state("");
+  let showingCachedData = $state(false);
+  let initializedUserId = $state<string | null>(null);
 
   $effect(() => {
-    if (auth.user) loadLatestSnapshot();
+    const userId = auth.user?.id;
+    if (!userId || initializedUserId === userId) return;
+
+    initializedUserId = userId;
+
+    const cached = readCache<SnapshotWithEntries | null>(
+      getLatestSnapshotCacheKey(userId),
+      CACHE_TTL_MS,
+    );
+
+    if (cached !== null) {
+      snapshot = cached;
+      showingCachedData = true;
+      loading = false;
+    }
+
+    loadLatestSnapshot();
   });
 
   async function loadLatestSnapshot() {
-    loading = true;
+    const userId = auth.user?.id;
+    if (!userId) return;
+
+    const hasExistingData = snapshot !== null || showingCachedData;
+    loading = !hasExistingData;
+    refreshing = hasExistingData;
     loadError = "";
 
     try {
@@ -26,7 +52,7 @@
         supabase
           .from("snapshots")
           .select("*, snapshot_entries(*)")
-          .eq("user_id", auth.user!.id)
+          .eq("user_id", userId)
           .order("date", { ascending: false })
           .limit(1)
           .maybeSingle(),
@@ -35,11 +61,23 @@
       snapshot = data
         ? { ...data, entries: data.snapshot_entries as SnapshotEntry[] }
         : null;
+      showingCachedData = false;
+
+      if (snapshot) {
+        writeCache(getLatestSnapshotCacheKey(userId), snapshot);
+      } else {
+        removeCache(getLatestSnapshotCacheKey(userId));
+      }
     } catch (error) {
       loadError = error instanceof Error ? error.message : "載入失敗";
     } finally {
       loading = false;
+      refreshing = false;
     }
+  }
+
+  function getLatestSnapshotCacheKey(userId: string) {
+    return `latest-snapshot:${userId}`;
   }
 
   function formatTwd(value: number): string {
@@ -156,6 +194,12 @@
     </div>
   {:else}
     <div class="px-4 pt-6 pb-24">
+      {#if showingCachedData || refreshing}
+        <div class="mb-4 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-900 dark:border-sky-900 dark:bg-sky-950/60 dark:text-sky-200">
+          {refreshing ? "顯示的是上次成功資料，正在同步最新內容。" : "目前顯示的是上次成功資料。"}
+        </div>
+      {/if}
+
       <div class="mb-6 flex items-start justify-between">
         <div>
           <div class="flex items-center gap-2">

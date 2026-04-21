@@ -2,10 +2,12 @@
 	import { supabase } from '$lib/supabase';
 	import { getBackendState, runWithBackendRecovery } from '$lib/backend.svelte';
 	import { getAuth } from '$lib/auth.svelte';
+	import { readCache, removeCache, writeCache } from '$lib/cache';
 	import PieChart from '$lib/components/PieChart.svelte';
 	import LineChart from '$lib/components/LineChart.svelte';
 	import type { SnapshotEntry } from '$lib/types';
 
+	const CACHE_TTL_MS = 1000 * 60 * 60 * 12;
 	const auth = getAuth();
 	const backend = getBackendState();
 
@@ -17,14 +19,34 @@
 
 	let snapshots = $state<SnapshotData[]>([]);
 	let loading = $state(true);
+	let refreshing = $state(false);
 	let loadError = $state('');
+	let showingCachedData = $state(false);
+	let initializedUserId = $state<string | null>(null);
 
 	$effect(() => {
-		if (auth.user) loadSnapshots();
+		const userId = auth.user?.id;
+		if (!userId || initializedUserId === userId) return;
+
+		initializedUserId = userId;
+
+		const cached = readCache<SnapshotData[]>(getReportsCacheKey(userId), CACHE_TTL_MS);
+		if (cached) {
+			snapshots = cached;
+			showingCachedData = true;
+			loading = false;
+		}
+
+		loadSnapshots();
 	});
 
 	async function loadSnapshots() {
-		loading = true;
+		const userId = auth.user?.id;
+		if (!userId) return;
+
+		const hasExistingData = snapshots.length > 0;
+		loading = !hasExistingData;
+		refreshing = hasExistingData;
 		loadError = '';
 
 		try {
@@ -32,7 +54,7 @@
 				supabase
 					.from('snapshots')
 					.select('*, snapshot_entries(*)')
-					.eq('user_id', auth.user!.id)
+					.eq('user_id', userId)
 					.order('date', { ascending: true })
 			);
 
@@ -41,11 +63,23 @@
 				date: s.date,
 				entries: s.snapshot_entries as SnapshotEntry[]
 			}));
+			showingCachedData = false;
+
+			if (snapshots.length > 0) {
+				writeCache(getReportsCacheKey(userId), snapshots);
+			} else {
+				removeCache(getReportsCacheKey(userId));
+			}
 		} catch (error) {
 			loadError = error instanceof Error ? error.message : '載入失敗';
 		} finally {
 			loading = false;
+			refreshing = false;
 		}
+	}
+
+	function getReportsCacheKey(userId: string) {
+		return `reports:${userId}`;
 	}
 
 	let latest = $derived(snapshots.length > 0 ? snapshots[snapshots.length - 1] : null);
@@ -171,6 +205,12 @@
 
 <div class="mx-auto min-h-screen max-w-md bg-gray-50 px-4 pt-6 pb-24 dark:bg-gray-900">
 	<h1 class="mb-6 text-lg font-bold text-gray-900 dark:text-white">報表</h1>
+
+	{#if showingCachedData || refreshing}
+		<div class="mb-4 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-900 dark:border-sky-900 dark:bg-sky-950/60 dark:text-sky-200">
+			{refreshing ? '顯示的是上次成功資料，正在同步最新內容。' : '目前顯示的是上次成功資料。'}
+		</div>
+	{/if}
 
 	{#if loading}
 		<div class="space-y-4">
